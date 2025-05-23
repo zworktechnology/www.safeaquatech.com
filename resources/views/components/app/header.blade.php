@@ -35,3 +35,4 @@
 
 <!-- Place the first <script> tag in your HTML's <head> -->
 <script src="https://cdn.tiny.cloud/1/gduif9elkdt5mcup5zffjzrc8qycnqswxxs4krqx3fjq1nfz/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+ @turnstileScripts()
