@@ -69,7 +69,7 @@
                                         placeholder="Full Name" required value="{{ old('date_of_birth') }}" />
                                 </div>
                                 <div class="col-lg-6">
-                                    <label>Weeding Date <spna class="text-danger">*</spna></label>
+                                    <label>Wedding Day<spna class="text-danger">*</spna></label>
                                     <input class="text" type="date" name="weeding_date" style="margin-left: 5px;"
                                         placeholder="M/s. XYZ pvt Ltd" required value="{{ old('weeding_date') }}" />
                                 </div>
