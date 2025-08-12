@@ -4003,9 +4003,9 @@ form .top-input {
 
 .contact-page-form .text {
   border-radius: 5px;
-  padding: 20px 30px;
-  margin-top: 0;
-  margin-bottom: 20px;
+  /* padding: 20px 30px; */
+  margin-top: 2px;
+  margin-bottom: 30px;
   outline: none;
 }
 

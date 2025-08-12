@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChangeProfileController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DealershipController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\FrontendController;
 
@@ -44,6 +45,10 @@ Route::get('/product', function () {
 Route::get('/contact', function () {
     return view('pages.frontend.contact');
 })->name('contact');
+
+Route::get('/dealership/interested/form', function () {
+    return view('pages.frontend.form');
+})->name('form');
 
 Route::get('/water-purifier', function () {
     return view('pages.frontend.water-purifier');
@@ -160,3 +165,6 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
 // CONTACT CONTROLLER // STORE
 Route::post('/contact/store', [ContactController::class, 'store'])->name('contact.store');
+
+// DEALERSHIP CONTROLLER // STORE
+Route::post('/dealership/interested/form/store', [DealershipController::class, 'store'])->name('dealership.store');
