@@ -26,6 +26,10 @@ Route::get('/', function () {
     return view('welcome');
 })->name('index');
 
+Route::get('/redirect', function () {
+    return view('redirect');
+})->name('redirect');
+
 Route::get('/about', function () {
     return view('pages.frontend.about');
 })->name('about');

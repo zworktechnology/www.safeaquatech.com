@@ -12,9 +12,9 @@
                         <li><a href="#">Mannarpuram, Tiruchirapalli</a></li>
                         <li><a href="#">Mon - Sat - 10.00 am - 7.00 pm</a></li>
                         <div class="footer-social">
-                            <a href="https://www.facebook.com/safeaquatech.tpj" target="_blank"> <i class="fab fa-facebook-f"></i></a>
+                            <a href="https://www.facebook.com/safeaquatech.official/" target="_blank"> <i class="fab fa-facebook-f"></i></a>
                             <a href="https://www.instagram.com/safeaquatech.tpj" target="_blank"><i class="fab fa-instagram"></i></a>
-                            <a href="https://www.youtube.com/@safeaquatech_tpj" target="_blank"><i class="fab fa-youtube"></i></a>
+                            <a href="https://www.youtube.com/@safeaquatech.official" target="_blank"><i class="fab fa-youtube"></i></a>
                         </div>
                     </ul>
                 </div>

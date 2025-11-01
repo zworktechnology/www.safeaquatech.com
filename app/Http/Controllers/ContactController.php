@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
 
 class ContactController extends Controller
 {
@@ -16,7 +18,7 @@ class ContactController extends Controller
 
     public function store(Request $request)
     {
-        $this->ValidatedData();
+
 
         $data = new Contact();
 
@@ -28,7 +30,27 @@ class ContactController extends Controller
 
         $data->save();
 
-        return redirect()->back();
+        // Live
+        $admin_number = 9344330043;
+
+        $name = $request->get('name');
+        $clinet_email = $request->get('email');
+        $client_phone = $request->get('phone');
+        $client_message = $request->get('message');
+        $client_subject = $request->get('subject');
+
+        $template = 'Hi%20M/s%20SAFE%20AQUATECH%20-%20Admin%0A%0ANew%20contact%20request%20has%20submitted%20with%20the%20following%20information%0A%0A*Name*%20:%20' . $name . '%0A*Mobile Number*%20:%20' . $client_phone . '%0A*Subject*%20:%20' . $client_subject . '%0A*Message*%20:%20' . $client_message . '%0A%0AGood luck!';
+
+
+        $access_token_key = '6846b47c20fee';
+        $instance_id_key = '6846B62860B93';
+
+        $response = http::post('https://mtechlivedemo.com/api/send?number=91' . $admin_number . '&type=text&message=' . $template . '&instance_id=' . $instance_id_key . '&access_token=' . $access_token_key . '');
+        if ($response->successful()) {
+            return redirect()->route('redirect');
+        } else {
+            return redirect()->back();
+        }
     }
 
     protected function validatedData()
