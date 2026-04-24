@@ -20,7 +20,7 @@ class ContactMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Safe Aqua Tech - Website Customer Enquiry Mail')
-        ->view('mail.contact');
+        // return $this->subject('Safe Aqua Tech - Website Customer Enquiry Mail')
+        // ->view('mail.contact');
     }
 }

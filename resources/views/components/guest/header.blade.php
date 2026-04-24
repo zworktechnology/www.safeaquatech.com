@@ -42,6 +42,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
     <script src='https://www.google.com/recaptcha/api.js'></script>
+
+     @turnstileScripts()
     <!-- Google Tag Manager -->
     <script>
         (function(w, d, s, l, i) {
@@ -59,6 +61,7 @@
             f.parentNode.insertBefore(j, f);
         })
         (window, document, 'script', 'dataLayer', 'GTM-PKG884Q7');
+
     </script>
     <!-- End Google Tag Manager -->
 

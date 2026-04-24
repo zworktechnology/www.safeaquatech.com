@@ -23,11 +23,11 @@ class Contact extends Model
     {
         Parent::boot();
 
-        static::created(function ($item) {
+        // static::created(function ($item) {
 
-            $to_submited_author = 'safeaquatech@gmail.com';
+        //     $to_submited_author = 'safeaquatech@gmail.com';
 
-            Mail::to($to_submited_author)->send(new ContactMail ($item));
-        });
+        //     Mail::to($to_submited_author)->send(new ContactMail ($item));
+        // });
     }
 }

@@ -77,20 +77,13 @@
                             </div>
                             <textarea name="message" class="subject" placeholder="How Can I Help You?" required>{{ old('message') }}</textarea>
 
-                            @error('g-recaptcha-response')
-                                <div class="alert alert-danger" style="color: red;">
-                                    {{ $message }}</div>
-                            @enderror
-                            <div style="display: flex">
+                           
+                            <div class="d-flex flex-md-row flex-column">
                                 <div>
-                                    @if (config('services.recaptcha.key'))
-                                        <div class="g-recaptcha" style="margin-top: 20px;"
-                                            data-sitekey="{{ config('services.recaptcha.key') }}">
-                                        </div>
-                                    @endif
+                                <div class="cf-turnstile" data-sitekey="{{ env('TURNSTILE_SITE_KEY') }}"></div>
                                 </div>
                                 <div style="margin-left: 30px;">
-                                    <button class="submit-btn" type="submit" value="Send Mail" name="submit">Send
+                                    <button class="submit-btn mt-0" type="submit" value="Send Mail" name="submit">Send
                                         Message</button>
                                 </div>
                             </div>
