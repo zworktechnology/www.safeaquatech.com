@@ -18,7 +18,17 @@ class ContactController extends Controller
 
     public function store(Request $request)
     {
+        // Cloudflare Turnstile server-side verification
+        $turnstileToken = $request->input('cf-turnstile-response');
+        $verify = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+            'secret'   => env('TURNSTILE_SECRET_KEY'),
+            'response' => $turnstileToken,
+            'remoteip' => $request->ip(),
+        ]);
 
+        if (! ($verify->json('success') ?? false)) {
+            return redirect()->back()->withInput()->withErrors(['captcha' => 'Security check failed. Please try again.']);
+        }
 
         $data = new Contact();
 

@@ -1,6 +1,7 @@
 @extends('layouts.guest')
 
 @section('content')
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <!-- Banner Start -->
     <section class="contact-banner page-banner">
         <div class="page-banner-bg">
@@ -78,9 +79,12 @@
                             <textarea name="message" class="subject" placeholder="How Can I Help You?" required>{{ old('message') }}</textarea>
 
                            
+                            @error('captcha')
+                                <p style="color:#E53E3E;font-size:13px;margin-bottom:8px;font-weight:600;">{{ $message }}</p>
+                            @enderror
                             <div class="d-flex flex-md-row flex-column">
                                 <div>
-                                <div class="cf-turnstile" data-sitekey="{{ env('TURNSTILE_SITE_KEY') }}"></div>
+                                <div class="cf-turnstile" data-sitekey="{{ env('TURNSTILE_SITE_KEY') }}" data-theme="light"></div>
                                 </div>
                                 <div style="margin-left: 30px;">
                                     <button class="submit-btn mt-0" type="submit" value="Send Mail" name="submit">Send

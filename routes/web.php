@@ -23,6 +23,10 @@ use App\Http\Controllers\FrontendController;
 Route::get('/sitemap.xml', [FrontendController::class, 'sitemap'])->name('sitemap');
 
 Route::get('/', function () {
+    return view('pages.frontend.gads');
+})->name('gads');
+
+Route::get('/index', function () {
     return view('welcome');
 })->name('index');
 
