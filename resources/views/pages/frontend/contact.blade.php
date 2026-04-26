@@ -85,8 +85,13 @@
                             @error('submit')
                                 <p style="color:#E53E3E;font-size:13px;margin-bottom:8px;font-weight:600;">{{ $message }}</p>
                             @enderror
-                            <!-- Invisible Turnstile — executed fresh on submit -->
-                            <div id="turnstile-container"></div>
+                            <!-- Invisible Turnstile — only executes on submit -->
+                            <div id="turnstile-widget"
+                                 class="cf-turnstile"
+                                 data-sitekey="{{ config('services.turnstile.site_key') }}"
+                                 data-size="invisible"
+                                 data-execution="execute">
+                            </div>
                             <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-token" />
                             <div>
                                 <button class="submit-btn mt-0" type="button" id="contact-submit-btn">Send Message</button>
@@ -106,17 +111,16 @@
         btn.textContent = 'Verifying…';
 
         try {
-            const container = document.getElementById('turnstile-container');
-            container.innerHTML = '';
             const token = await new Promise((resolve, reject) => {
-                turnstile.render(container, {
-                    sitekey:            '{{ config("services.turnstile.site_key") }}',
-                    size:               'invisible',
+                const widget = document.getElementById('turnstile-widget');
+                widget._resolve = resolve;
+                widget._reject  = reject;
+                turnstile.reset('#turnstile-widget');
+                turnstile.execute('#turnstile-widget', {
                     callback:           resolve,
                     'error-callback':   () => reject(new Error('error')),
                     'expired-callback': () => reject(new Error('expired')),
                 });
-                turnstile.execute(container);
             });
             document.getElementById('cf-turnstile-token').value = token;
             document.querySelector('.contact_form').submit();

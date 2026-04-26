@@ -1042,8 +1042,16 @@ body {
         <label>Your Area in Trichy</label>
         <input type="text" id="farea" placeholder="e.g. Mannarpuram, Ariyamangalam..." />
       </div>
-      <!-- Invisible Turnstile — executed fresh on every submit -->
-      <div id="turnstile-container"></div>
+      <!-- Invisible Turnstile — only executes when submitForm() calls turnstile.execute() -->
+      <div id="turnstile-widget"
+           class="cf-turnstile"
+           data-sitekey="{{ config('services.turnstile.site_key') }}"
+           data-size="invisible"
+           data-execution="execute"
+           data-callback="onTurnstileSuccess"
+           data-error-callback="onTurnstileError"
+           data-expired-callback="onTurnstileExpired">
+      </div>
       <button class="submit-btn" onclick="submitForm()">Book My Free Water Test →</button>
       <p class="privacy-note">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -1277,18 +1285,24 @@ body {
    Worker URL:  replace WORKER_URL below after deploying
    worker.js from the same folder.
 ═══════════════════════════════════════════════════════ */
+let _tsResolve = null, _tsReject = null;
+
+function onTurnstileSuccess(token) {
+  if (_tsResolve) { _tsResolve(token); _tsResolve = _tsReject = null; }
+}
+function onTurnstileError()   {
+  if (_tsReject)  { _tsReject(new Error('error'));   _tsResolve = _tsReject = null; }
+}
+function onTurnstileExpired() {
+  if (_tsReject)  { _tsReject(new Error('expired')); _tsResolve = _tsReject = null; }
+}
+
 function getFreshTurnstileToken() {
   return new Promise((resolve, reject) => {
-    const container = document.getElementById('turnstile-container');
-    container.innerHTML = '';
-    turnstile.render(container, {
-      sitekey:          '{{ config("services.turnstile.site_key") }}',
-      size:             'invisible',
-      callback:         resolve,
-      'error-callback': () => reject(new Error('Turnstile error')),
-      'expired-callback': () => reject(new Error('Turnstile expired')),
-    });
-    turnstile.execute(container);
+    _tsResolve = resolve;
+    _tsReject  = reject;
+    turnstile.reset('#turnstile-widget');
+    turnstile.execute('#turnstile-widget');
   });
 }
 
