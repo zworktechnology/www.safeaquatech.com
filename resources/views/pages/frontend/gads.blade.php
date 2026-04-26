@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Safe Aqua Tech – Free Water Quality Test</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <!-- Cloudflare Turnstile — replace data-sitekey with your key from dash.cloudflare.com -->
@@ -1041,14 +1042,8 @@ body {
         <label>Your Area in Trichy</label>
         <input type="text" id="farea" placeholder="e.g. Mannarpuram, Ariyamangalam..." />
       </div>
-      <!-- Cloudflare Turnstile widget — replace sitekey with yours from dash.cloudflare.com -->
-      <div class="turnstile-wrap">
-        <div class="cf-turnstile"
-             data-sitekey="{{ env('TURNSTILE_SITE_KEY') }}"
-             data-theme="light"
-             data-size="normal">
-        </div>
-      </div>
+      <!-- Invisible Turnstile — executed fresh on every submit -->
+      <div id="turnstile-container"></div>
       <button class="submit-btn" onclick="submitForm()">Book My Free Water Test →</button>
       <p class="privacy-note">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -1282,12 +1277,25 @@ body {
    Worker URL:  replace WORKER_URL below after deploying
    worker.js from the same folder.
 ═══════════════════════════════════════════════════════ */
-const WORKER_URL = 'https://YOUR_WORKER.YOUR_SUBDOMAIN.workers.dev';
+function getFreshTurnstileToken() {
+  return new Promise((resolve, reject) => {
+    const container = document.getElementById('turnstile-container');
+    container.innerHTML = '';
+    turnstile.render(container, {
+      sitekey:          '{{ config("services.turnstile.site_key") }}',
+      size:             'invisible',
+      callback:         resolve,
+      'error-callback': () => reject(new Error('Turnstile error')),
+      'expired-callback': () => reject(new Error('Turnstile expired')),
+    });
+    turnstile.execute(container);
+  });
+}
 
 async function submitForm() {
-  const name  = document.getElementById('fname').value.trim();
-  const phone = document.getElementById('fphone').value.trim();
-  const area  = document.getElementById('farea').value.trim();
+  const name   = document.getElementById('fname').value.trim();
+  const phone  = document.getElementById('fphone').value.trim();
+  const area   = document.getElementById('farea').value.trim();
   const source = document.getElementById('fsource').value;
   const time   = document.getElementById('ftime').value;
 
@@ -1297,24 +1305,26 @@ async function submitForm() {
     return;
   }
 
-  // Cloudflare Turnstile — client-side presence check
-  const tokenInput = document.querySelector('[name="cf-turnstile-response"]');
-  if (!tokenInput || !tokenInput.value) {
-    showFormError('Please complete the security check first.');
+  const btn = document.querySelector('.submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span> Submitting…';
+
+  let token;
+  try {
+    token = await getFreshTurnstileToken();
+  } catch (e) {
+    showFormError('Security check failed. Please try again.');
+    resetBtn(btn);
     return;
   }
 
-  const btn = document.querySelector('.submit-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="btn-spinner"></span> Verifying…';
-
   try {
-    // Server-side Turnstile verification via Cloudflare Worker
-    const res = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const csrf = document.querySelector('meta[name="csrf-token"]').content;
+    const res  = await fetch('{{ route("gads.store") }}', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
       body: JSON.stringify({
-        token:  tokenInput.value,
+        'cf-turnstile-response': token,
         name, phone, area, source, time,
       }),
     });
@@ -1322,20 +1332,13 @@ async function submitForm() {
     const data = await res.json();
 
     if (!res.ok || !data.success) {
-      showFormError(data.error || 'Verification failed. Please try again.');
-      if (typeof turnstile !== 'undefined') turnstile.reset();
+      showFormError(data.error || 'Submission failed. Please try again.');
       resetBtn(btn);
       return;
     }
 
-    // ── SUCCESS ──
     document.getElementById('form-body').style.display = 'none';
     document.getElementById('success').style.display   = 'block';
-
-    const msg = encodeURIComponent(
-      `Hi Safe Aqua Tech! Booking submitted ✅\n\nName: ${name}\nPhone: ${phone}\nArea: ${area || 'Trichy'}\nSource: ${source || '—'}\nTime: ${time || 'Any'}\n\nPlease confirm my FREE 22-point water quality test slot.`
-    );
-    setTimeout(() => window.open(`https://api.whatsapp.com/send/?phone=919344330043&text=${msg}`, '_blank'), 1500);
 
   } catch (err) {
     showFormError('Network error. Please try WhatsApp or call us directly.');

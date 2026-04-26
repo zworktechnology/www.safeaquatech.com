@@ -32,6 +32,17 @@ return [
     'recaptcha' => [
         'key' => env('RECAPTCHA_SITE_KEY'),
         'secret' => env('RECAPTCHA_SITE_SECRET'),
-    ]
+    ],
+
+    'turnstile' => [
+        'site_key'   => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
+    'meta_whatsapp' => [
+        'phone_number_id' => env('META_WHATSAPP_PHONE_NUMBER_ID'),
+        'access_token'    => env('META_WHATSAPP_ACCESS_TOKEN'),
+        'admin_number'    => env('META_WHATSAPP_ADMIN_NUMBER'),
+    ],
 
 ];

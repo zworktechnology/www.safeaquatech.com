@@ -82,14 +82,14 @@
                             @error('captcha')
                                 <p style="color:#E53E3E;font-size:13px;margin-bottom:8px;font-weight:600;">{{ $message }}</p>
                             @enderror
-                            <div class="d-flex flex-md-row flex-column">
-                                <div>
-                                <div class="cf-turnstile" data-sitekey="{{ env('TURNSTILE_SITE_KEY') }}" data-theme="light"></div>
-                                </div>
-                                <div style="margin-left: 30px;">
-                                    <button class="submit-btn mt-0" type="submit" value="Send Mail" name="submit">Send
-                                        Message</button>
-                                </div>
+                            @error('submit')
+                                <p style="color:#E53E3E;font-size:13px;margin-bottom:8px;font-weight:600;">{{ $message }}</p>
+                            @enderror
+                            <!-- Invisible Turnstile — executed fresh on submit -->
+                            <div id="turnstile-container"></div>
+                            <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-token" />
+                            <div>
+                                <button class="submit-btn mt-0" type="button" id="contact-submit-btn">Send Message</button>
                             </div>
                         </div>
                     </form>
@@ -98,6 +98,34 @@
         </div>
     </section>
     <!-- Contact Page Section End -->
+
+    <script>
+    document.getElementById('contact-submit-btn').addEventListener('click', async function () {
+        const btn = this;
+        btn.disabled = true;
+        btn.textContent = 'Verifying…';
+
+        try {
+            const container = document.getElementById('turnstile-container');
+            container.innerHTML = '';
+            const token = await new Promise((resolve, reject) => {
+                turnstile.render(container, {
+                    sitekey:            '{{ config("services.turnstile.site_key") }}',
+                    size:               'invisible',
+                    callback:           resolve,
+                    'error-callback':   () => reject(new Error('error')),
+                    'expired-callback': () => reject(new Error('expired')),
+                });
+                turnstile.execute(container);
+            });
+            document.getElementById('cf-turnstile-token').value = token;
+            document.querySelector('.contact_form').submit();
+        } catch (e) {
+            btn.disabled = false;
+            btn.textContent = 'Send Message';
+        }
+    });
+    </script>
 
     <!-- Location Map Start -->
     <div class="location">

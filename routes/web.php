@@ -9,6 +9,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DealershipController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\GadsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -173,6 +174,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
 // CONTACT CONTROLLER // STORE
 Route::post('/contact/store', [ContactController::class, 'store'])->name('contact.store');
+
+// GADS FORM // STORE
+Route::post('/gads/enquiry', [GadsController::class, 'store'])->name('gads.store');
 
 // DEALERSHIP CONTROLLER // STORE
 Route::post('/dealership/interested/form/store', [DealershipController::class, 'store'])->name('dealership.store');

@@ -21,7 +21,7 @@ class ContactController extends Controller
         // Cloudflare Turnstile server-side verification
         $turnstileToken = $request->input('cf-turnstile-response');
         $verify = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
-            'secret'   => env('TURNSTILE_SECRET_KEY'),
+            'secret'   => config('services.turnstile.secret_key'),
             'response' => $turnstileToken,
             'remoteip' => $request->ip(),
         ]);
@@ -40,59 +40,47 @@ class ContactController extends Controller
 
         $data->save();
 
-        // Live
-        $admin_number = 9344330043;
+        $details = implode(' | ', array_filter([
+            'Name: '    . $request->get('name'),
+            'Phone: '   . $request->get('phone'),
+            'Email: '   . $request->get('email'),
+            'Subject: ' . $request->get('subject'),
+            'Message: ' . $request->get('message'),
+            'Source: Contact Us Form',
+        ]));
 
-        $name = $request->get('name');
-        $clinet_email = $request->get('email');
-        $client_phone = $request->get('phone');
-        $client_message = $request->get('message');
-        $client_subject = $request->get('subject');
+        $sent = $this->sendMetaAlert($details);
 
-        $template = 'Hi%20M/s%20SAFE%20AQUATECH%20-%20Admin%0A%0ANew%20contact%20request%20has%20submitted%20with%20the%20following%20information%0A%0A*Name*%20:%20' . $name . '%0A*Mobile Number*%20:%20' . $client_phone . '%0A*Subject*%20:%20' . $client_subject . '%0A*Message*%20:%20' . $client_message . '%0A%0AGood luck!';
-
-
-        $access_token_key = '6846b47c20fee';
-        $instance_id_key = '6846B62860B93';
-
-        $response = http::post('https://mtechlivedemo.com/api/send?number=91' . $admin_number . '&type=text&message=' . $template . '&instance_id=' . $instance_id_key . '&access_token=' . $access_token_key . '');
-        if ($response->successful()) {
-            return redirect()->route('redirect');
-        } else {
-            return redirect()->back();
+        if (! $sent) {
+            return redirect()->back()->withInput()->withErrors([
+                'submit' => 'Sorry, we could not process your request. Please try again.',
+            ]);
         }
+
+        return redirect()->route('redirect');
     }
 
-    protected function validatedData()
+    protected function sendMetaAlert(string $details): bool
     {
-        return request()->validate(
-            [
-                'g-recaptcha-response' => 'required|recaptcha'
-            ],
-            [
-                'g-recaptcha-response.required' => 'Captcha is Required',
-            ]
-        );
+        $response = Http::withToken(config('services.meta_whatsapp.access_token'))
+            ->post('https://graph.facebook.com/v20.0/' . config('services.meta_whatsapp.phone_number_id') . '/messages', [
+                'messaging_product' => 'whatsapp',
+                'to'                => config('services.meta_whatsapp.admin_number'),
+                'type'              => 'template',
+                'template'          => [
+                    'name'     => 'website_form_admin_alert',
+                    'language' => ['code' => 'en_US'],
+                    'components' => [
+                        [
+                            'type'       => 'body',
+                            'parameters' => [
+                                ['type' => 'text', 'text' => $details],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        return $response->successful();
     }
-
-    // public function store(Request $request)
-    // {
-    //     $data = new Contact();
-
-    //     $data->name = $request->get('name');
-    //     $data->email = $request->get('email');
-    //     $data->phone_number = $request->get('phone_number');
-    //     $data->message = $request->get('message');
-
-    //     $data->save();
-
-    //     $fromnumer = '918098565686';
-    //     $number = $data->phone_number;
-    //     $mailid = $data->email;
-    //     $message = 'Thanks for reaching out our team with the mail id of '.$mailid.' will contact you soon - Zwork Technology.';
-
-    //     $url = 'https://apinew.getitsms.com/send-msg?apikey=jNBGRg6XeUG71uHjqN03TZENSlKxaJ&sender='.$fromnumer.'&receiver=91'.$number.'&message='.$message.'';
-
-    //     return Redirect::to($url)->with('redirectToFunction', true);
-    // }
 }
