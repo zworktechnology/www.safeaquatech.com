@@ -1357,9 +1357,14 @@
       transition: opacity 0.2s, transform 0.2s;
     }
 
-    .submit-btn:hover {
+    .submit-btn:hover:not(:disabled) {
       opacity: 0.9;
       transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
 
     .turnstile-wrap {
@@ -2067,7 +2072,7 @@
               data-size="invisible" data-execution="execute" data-callback="onTurnstileSuccess"
               data-error-callback="onTurnstileError" data-expired-callback="onTurnstileExpired">
             </div>
-            <button class="submit-btn" onclick="submitForm()">Book My Free Water Test →</button>
+            <button class="submit-btn" onclick="submitForm()" id="gads-submit-btn" disabled>Book My Free Water Test →</button>
             <p class="privacy-note">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <rect x="3" y="11" width="18" height="11" rx="2" />
@@ -2403,8 +2408,9 @@
     }
 
     function resetBtn(btn) {
-      btn.disabled = false;
       btn.innerHTML = 'Book My Free Water Test →';
+      const allFilled = ['fname', 'fphone', 'farea'].every(id => document.getElementById(id).value.trim() !== '');
+      btn.disabled = !allFilled;
     }
 
     function showFormError(msg) {
@@ -2424,6 +2430,20 @@
       wrap.style.animation = 'shake 0.4s ease';
       wrap.addEventListener('animationend', () => wrap.style.animation = '', { once: true });
     }
+
+    (function () {
+      const btn = document.getElementById('gads-submit-btn');
+      const requiredFields = ['fname', 'fphone', 'farea'];
+
+      function checkFields() {
+        const allFilled = requiredFields.every(id => document.getElementById(id).value.trim() !== '');
+        btn.disabled = !allFilled;
+      }
+
+      requiredFields.forEach(id => {
+        document.getElementById(id).addEventListener('input', checkFields);
+      });
+    })();
   </script>
 </body>
 

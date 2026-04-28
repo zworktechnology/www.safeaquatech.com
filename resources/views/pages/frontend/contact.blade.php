@@ -94,7 +94,7 @@
                             </div>
                             <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-token" />
                             <div>
-                                <button class="submit-btn mt-0" type="button" id="contact-submit-btn">Send Message</button>
+                                <button class="submit-btn mt-0" type="button" id="contact-submit-btn" disabled style="opacity:0.45;cursor:not-allowed;">Send Message</button>
                             </div>
                         </div>
                     </form>
@@ -105,6 +105,26 @@
     <!-- Contact Page Section End -->
 
     <script>
+    (function () {
+        const btn = document.getElementById('contact-submit-btn');
+        const fields = [
+            document.querySelector('[name="name"]'),
+            document.querySelector('[name="email"]'),
+            document.querySelector('[name="phone"]'),
+            document.querySelector('[name="subject"]'),
+            document.querySelector('[name="message"]'),
+        ];
+
+        function checkFields() {
+            const allFilled = fields.every(f => f.value.trim() !== '');
+            btn.disabled = !allFilled;
+            btn.style.opacity = allFilled ? '' : '0.45';
+            btn.style.cursor = allFilled ? '' : 'not-allowed';
+        }
+
+        fields.forEach(f => f.addEventListener('input', checkFields));
+    })();
+
     document.getElementById('contact-submit-btn').addEventListener('click', async function () {
         const btn = this;
         btn.disabled = true;
@@ -125,8 +145,10 @@
             document.getElementById('cf-turnstile-token').value = token;
             document.querySelector('.contact_form').submit();
         } catch (e) {
-            btn.disabled = false;
             btn.textContent = 'Send Message';
+            btn.disabled = false;
+            btn.style.opacity = '';
+            btn.style.cursor = '';
         }
     });
     </script>
